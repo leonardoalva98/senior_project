@@ -1,5 +1,5 @@
 ---
-title: "Leo Alvarino Senior Project"
+title: "Early Sepsis Detection: A Data Science Approach"
 listing:
   contents: posts
   feed: true
