@@ -1,0 +1,37 @@
+---
+title: "Test Marimo Post"
+description: ""
+author: "J. Hathaway"
+date: "2026-02-24"
+categories: []
+draft: true
+---
+
+
+## Explore a marimo based post
+
+This repository provides a framework for integrating
+[](https://quarto.org) with [](https://marimo.io),
+enabling markdown documents to be executed in a  environment, and
+reactive in page.
+
+```{python.marimo}
+import marimo as mo
+```
+
+```{python.marimo}
+slider = mo.ui.slider(start=1, stop=10)
+slider
+```
+
+```{python.marimo}
+#| echo: true
+mo.md(f'''
+  # Hello from marimo!{'!' * slider.value}
+
+  This is a raw, reactive python cell.
+  You can edit it, and the output will change on run.
+''').callout("info")
+```
+
+Write your post here.

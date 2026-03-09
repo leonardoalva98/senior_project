@@ -1,0 +1,29 @@
+[project]
+name = "leoalvarino"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "leonardoalva98", email = "alv22027@byui.edu" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "lets-plot>=4.8.2",
+    "polars[async,database,excel,fsspec,graph,numpy,plot,pyarrow,style,timezone]>=1.38.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.6,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "marimo>=0.19.11",
+    "nbclient>=0.10.4",
+    "nbformat>=5.10.4",
+    "pyyaml>=6.0.3",
+]
+
+[tool.uv]
+package = false
