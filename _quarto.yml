@@ -1,17 +1,18 @@
 project:
   type: website
-
+  output-dir: docs
+  
 website:
   description: "A blog built with Quarto"
-  site-url: https://your-website-url.example.com # you must change this appropriately for RSS feeds to work properly
-  title: "Blog 1"
+  site-url: https://leonardoalva98.github.io/senior_project/ # you must change this appropriately for RSS feeds to work properly
+  title: "Leo Alvarino Senior Project"
   navbar:
     right:
       - about.qmd
       - icon: github
-        href: https://github.com/
-      - icon: twitter
-        href: https://twitter.com
+        href: https://github.com/leonardoalva98
+      - icon: linkedin  
+        href: https://www.linkedin.com/in/leonardoalva98/
 format:
   html:
     theme:

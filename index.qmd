@@ -1,5 +1,5 @@
 ---
-title: "Blog 1"
+title: "Leo Alvarino Senior Project"
 listing:
   contents: posts
   feed: true

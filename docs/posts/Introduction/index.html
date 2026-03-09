@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Leonardo Alvarino">
+<meta name="dcterms.date" content="2026-03-09">
+<meta name="description" content="Every year, sepsis kills more Americans than breast cancer, prostate cancer, and opioid overdoses combined. Here’s how machine learning could change that.">
 
-<title>About – Blog 1</title>
+<title>The Silent Killer in the ICU — And How AI Could Help Stop It – Leo Alvarino Senior Project</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,23 +29,24 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-076ecbd647e1f0418c5051713cd9b730.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-076ecbd647e1f0418c5051713cd9b730.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,7 +76,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed fullcontent quarto-light">
@@ -82,8 +86,8 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Blog 1</span>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Leo Alvarino Senior Project</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -93,16 +97,16 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./about.html" aria-current="page"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/leonardoalva98"> <i class="bi bi-github" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/leonardoalva98/"> <i class="bi bi-linkedin" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -119,39 +123,107 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     
 <!-- main -->
-<div class="quarto-about-jolla">
-  <img src="profile.jpg" class="about-image
-  round " style="height: 15em; width: 15em;">
- <header id="title-block-header" class="quarto-title-block default">
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">About</h1>
-</div>
-<div class="quarto-title-meta">
+<h1 class="title">The Silent Killer in the ICU — And How AI Could Help Stop It</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">healthcare</div>
+    <div class="quarto-category">AI</div>
+    <div class="quarto-category">data science</div>
   </div>
-</header><main class="content" id="quarto-document-content">
-<p>About this blog</p>
+  </div>
+
+<div>
+  <div class="description">
+    Every year, sepsis kills more Americans than breast cancer, prostate cancer, and opioid overdoses combined. Here’s how machine learning could change that.
+  </div>
+</div>
 
 
-</main> 
-  <hr class="about-sep">
-   <div class="about-links">
-  <a href="https://twitter.com" class="about-link" rel="" target="">
-    <i class="bi bi-twitter"></i>
-     <span class="about-link-text">Twitter</span>
-  </a>
-  <a href="https://linkedin.com" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="https://github.com" class="about-link" rel="" target="">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
-</div>
-</div>
- <!-- /main -->
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Leonardo Alvarino </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 9, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Imagine you’re a nurse managing six patients in an intensive care unit. It’s hour nine of a twelve-hour shift. You’re charting vitals, managing medications, responding to alarms. One of your patients — a 72-year-old man recovering from abdominal surgery — looks stable. His numbers aren’t alarming. Nothing is flagging.</p>
+<p>But something is quietly going wrong.</p>
+<p>Over the next six hours, his heart rate creeps up. His blood pressure dips slightly. His breathing becomes a little faster. Each change, on its own, looks unremarkable. Together, they tell a story that won’t become obvious until it’s almost too late: he is developing sepsis.</p>
+<section id="what-is-sepsis" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-sepsis">What Is Sepsis?</h2>
+<p>Sepsis is not a disease you catch. It’s what happens when your body’s response to an infection spirals out of control. Instead of fighting the infection, the immune system begins attacking the body’s own tissues and organs. Blood pressure drops. Organs start to fail. Time becomes the enemy.</p>
+<p>Every hour of delayed treatment increases the risk of death by roughly 7%. And yet, because the early signs are subtle and easy to miss — especially in an ICU where every patient has abnormal vitals — sepsis is often caught too late.</p>
+<p>In the United States alone, sepsis kills approximately 270,000 people every year. It is the leading cause of death in hospitals and the most expensive condition to treat, costing the healthcare system over $62 billion annually.</p>
+<p>Those aren’t just statistics. Behind each one is a family that got a phone call they weren’t expecting.</p>
+</section>
+<section id="why-is-it-so-hard-to-catch-early" class="level2">
+<h2 class="anchored" data-anchor-id="why-is-it-so-hard-to-catch-early">Why Is It So Hard to Catch Early?</h2>
+<p>The challenge with sepsis is that it doesn’t announce itself. It develops gradually, through patterns that are hard for humans to track in real time — especially when one nurse is responsible for multiple critically ill patients simultaneously.</p>
+<p>Current clinical tools like qSOFA and SIRS criteria give nurses simple checklists to assess sepsis risk. Check three boxes, add up the score. These tools are better than nothing, but they have real limitations. They look at a single snapshot in time. They don’t account for trends. And they rely on a nurse remembering to run the check in the first place.</p>
+<p>The signal is there. It’s just buried in noise, spread across hours of data, easy to overlook when you’re running between rooms.</p>
+</section>
+<section id="what-if-a-machine-was-watching" class="level2">
+<h2 class="anchored" data-anchor-id="what-if-a-machine-was-watching">What If a Machine Was Watching?</h2>
+<p>This is where machine learning enters the picture.</p>
+<p>For my senior data science capstone project, I’m building a Sepsis Early Warning System using real ICU data from the PhysioNet Computing in Cardiology Challenge 2019 — a dataset containing over 20,000 de-identified patient records from actual intensive care units.</p>
+<p>Each patient record contains hourly readings of vital signs and lab values: heart rate, temperature, blood pressure, oxygen saturation, respiration rate, white blood cell count, lactate levels, and more. And critically, each row is labeled — sepsis eventually developed, or it didn’t.</p>
+<p>The goal is to train a machine learning model to recognize the pattern that precedes sepsis onset, up to 12 hours before a clinician would traditionally identify it.</p>
+<p>Not by looking at one number. By looking at how all the numbers move together over time.</p>
+</section>
+<section id="why-12-hours-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-12-hours-matters">Why 12 Hours Matters</h2>
+<p>Twelve hours of advance warning in the ICU is enormous. It’s the difference between a nurse proactively administering antibiotics and fluids before a crisis, versus scrambling to stabilize a patient who is already in septic shock.</p>
+<p>Early intervention means shorter ICU stays. Fewer organ failures. Lower mortality. Less cost. And for the patient’s family — more time.</p>
+</section>
+<section id="this-is-not-replacing-nurses" class="level2">
+<h2 class="anchored" data-anchor-id="this-is-not-replacing-nurses">This Is Not Replacing Nurses</h2>
+<p>I want to be clear about something: a tool like this is not meant to replace clinical judgment. Nurses and physicians bring expertise, intuition, and human context that no algorithm can replicate. What a well-designed early warning system does is give them better information, earlier.</p>
+<p>Think of it like a smoke detector. The detector doesn’t put out the fire. It gives you time to act before things get worse.</p>
+<p>The Streamlit web application I’m building as part of this project will allow a user to input a patient’s current vitals and receive a risk score — Low, Medium, or High — along with an explanation of which factors are driving that prediction. The explainability piece is intentional. A tool that just outputs a number isn’t clinically useful. A tool that says “this patient’s lactate trend and rising heart rate over the past six hours are the primary concern” gives a nurse something actionable.</p>
+</section>
+<section id="what-comes-next" class="level2">
+<h2 class="anchored" data-anchor-id="what-comes-next">What Comes Next</h2>
+<p>This is the first of three posts documenting my journey building this system from scratch.</p>
+<p>In the next post, I’ll get into the technical details: how I cleaned and processed 20,000 messy ICU patient files, what features the model actually learns from, and how XGBoost compares to simpler baseline approaches.</p>
+<p>In the final post, I’ll walk through deploying the model as a live web application and reflect on what building this project taught me about the gap between research and real-world clinical deployment.</p>
+<p>The problem of sepsis is not new. The data to fight it has existed for years. What’s changing is our ability to make sense of it — and I believe that data scientists working alongside clinicians have a genuine role to play in saving lives.</p>
+<p>Let’s get to work.</p>
+<hr>
+<p><em>Leonardo Alvarino is a senior data science student building his capstone portfolio with a focus on clinical AI applications. This project was developed using the PhysioNet CinC Challenge 2019 dataset.</em></p>
+
+
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
         if (clz.startsWith('code-annotation-')) {                     
@@ -216,7 +288,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/your-website-url\.example\.com");
+        var filterRegex = new RegExp("https:\/\/leonardoalva98\.github\.io\/senior_project\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

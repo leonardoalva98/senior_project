@@ -1,0 +1,73 @@
+---
+title: "The Silent Killer in the ICU — And How AI Could Help Stop It"
+author: "Leonardo Alvarino"
+date: "2026-03-09"
+categories: [healthcare, AI, data science]
+description: "Every year, sepsis kills more Americans than breast cancer, prostate cancer, and opioid overdoses combined. Here's how machine learning could change that."
+---
+
+Imagine you're a nurse managing six patients in an intensive care unit. It's hour nine of a twelve-hour shift. You're charting vitals, managing medications, responding to alarms. One of your patients — a 72-year-old man recovering from abdominal surgery — looks stable. His numbers aren't alarming. Nothing is flagging.
+
+But something is quietly going wrong.
+
+Over the next six hours, his heart rate creeps up. His blood pressure dips slightly. His breathing becomes a little faster. Each change, on its own, looks unremarkable. Together, they tell a story that won't become obvious until it's almost too late: he is developing sepsis.
+
+## What Is Sepsis?
+
+Sepsis is not a disease you catch. It's what happens when your body's response to an infection spirals out of control. Instead of fighting the infection, the immune system begins attacking the body's own tissues and organs. Blood pressure drops. Organs start to fail. Time becomes the enemy.
+
+Every hour of delayed treatment increases the risk of death by roughly 7%. And yet, because the early signs are subtle and easy to miss — especially in an ICU where every patient has abnormal vitals — sepsis is often caught too late.
+
+In the United States alone, sepsis kills approximately 270,000 people every year. It is the leading cause of death in hospitals and the most expensive condition to treat, costing the healthcare system over $62 billion annually.
+
+Those aren't just statistics. Behind each one is a family that got a phone call they weren't expecting.
+
+## Why Is It So Hard to Catch Early?
+
+The challenge with sepsis is that it doesn't announce itself. It develops gradually, through patterns that are hard for humans to track in real time — especially when one nurse is responsible for multiple critically ill patients simultaneously.
+
+Current clinical tools like qSOFA and SIRS criteria give nurses simple checklists to assess sepsis risk. Check three boxes, add up the score. These tools are better than nothing, but they have real limitations. They look at a single snapshot in time. They don't account for trends. And they rely on a nurse remembering to run the check in the first place.
+
+The signal is there. It's just buried in noise, spread across hours of data, easy to overlook when you're running between rooms.
+
+## What If a Machine Was Watching?
+
+This is where machine learning enters the picture.
+
+For my senior data science capstone project, I'm building a Sepsis Early Warning System using real ICU data from the PhysioNet Computing in Cardiology Challenge 2019 — a dataset containing over 20,000 de-identified patient records from actual intensive care units.
+
+Each patient record contains hourly readings of vital signs and lab values: heart rate, temperature, blood pressure, oxygen saturation, respiration rate, white blood cell count, lactate levels, and more. And critically, each row is labeled — sepsis eventually developed, or it didn't.
+
+The goal is to train a machine learning model to recognize the pattern that precedes sepsis onset, up to 12 hours before a clinician would traditionally identify it.
+
+Not by looking at one number. By looking at how all the numbers move together over time.
+
+## Why 12 Hours Matters
+
+Twelve hours of advance warning in the ICU is enormous. It's the difference between a nurse proactively administering antibiotics and fluids before a crisis, versus scrambling to stabilize a patient who is already in septic shock.
+
+Early intervention means shorter ICU stays. Fewer organ failures. Lower mortality. Less cost. And for the patient's family — more time.
+
+## This Is Not Replacing Nurses
+
+I want to be clear about something: a tool like this is not meant to replace clinical judgment. Nurses and physicians bring expertise, intuition, and human context that no algorithm can replicate. What a well-designed early warning system does is give them better information, earlier.
+
+Think of it like a smoke detector. The detector doesn't put out the fire. It gives you time to act before things get worse.
+
+The Streamlit web application I'm building as part of this project will allow a user to input a patient's current vitals and receive a risk score — Low, Medium, or High — along with an explanation of which factors are driving that prediction. The explainability piece is intentional. A tool that just outputs a number isn't clinically useful. A tool that says "this patient's lactate trend and rising heart rate over the past six hours are the primary concern" gives a nurse something actionable.
+
+## What Comes Next
+
+This is the first of three posts documenting my journey building this system from scratch.
+
+In the next post, I'll get into the technical details: how I cleaned and processed 20,000 messy ICU patient files, what features the model actually learns from, and how XGBoost compares to simpler baseline approaches.
+
+In the final post, I'll walk through deploying the model as a live web application and reflect on what building this project taught me about the gap between research and real-world clinical deployment.
+
+The problem of sepsis is not new. The data to fight it has existed for years. What's changing is our ability to make sense of it — and I believe that data scientists working alongside clinicians have a genuine role to play in saving lives.
+
+Let's get to work.
+
+---
+
+*Leonardo Alvarino is a senior data science student building his capstone portfolio with a focus on clinical AI applications. This project was developed using the PhysioNet CinC Challenge 2019 dataset.*
