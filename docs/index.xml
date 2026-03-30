@@ -10,7 +10,119 @@
 <atom:link href="https://leonardoalva98.github.io/senior_project/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog built with Quarto</description>
 <generator>quarto-1.9.23</generator>
-<lastBuildDate>Mon, 09 Mar 2026 06:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 29 Mar 2026 06:00:00 GMT</lastBuildDate>
+<item>
+  <title>Building a Sepsis Predictor</title>
+  <dc:creator>Leonardo Alvarino</dc:creator>
+  <link>https://leonardoalva98.github.io/senior_project/posts/Building-the-model/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>In my <a href="../../posts/Introduction/index.html">first post</a>, I explained why sepsis is so hard to catch early and why machine learning could help. In this post I’ll walk through exactly how I built the model: the messy data, the engineering decisions, and the trade offs along the way.</p>
+<section id="the-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="the-dataset">The Dataset</h2>
+<p>The data comes from the PhysioNet Computing in Cardiology Challenge 2019 — a publicly available dataset of <strong>20,336 de-identified ICU patients</strong> from two US hospital systems. Each patient file contains one row per hour in the ICU, with columns for vital signs, lab values, and demographics.</p>
+<p>After combining all 20,336 files into one dataframe, I had <strong>790,215 rows and 42 columns</strong>. That’s every hourly ICU reading across all patients — a complete picture of what it looks like to monitor someone in critical care.</p>
+<p>One important detail about the labels: the PhysioNet challenge shifts <code>SepsisLabel</code> six hours ahead of clinical diagnosis. This means when the label flips to 1, it’s already 6 hours before a doctor would officially recognize sepsis. Every prediction the model makes is therefore automatically 6 hours ahead of clinical recognition, before I even start feature engineering.</p>
+</section>
+<section id="the-mess-missing-values" class="level2">
+<h2 class="anchored" data-anchor-id="the-mess-missing-values">The Mess: Missing Values</h2>
+<p>Vital signs like heart rate and blood pressure are recorded continuously by bedside monitors, but even those have gaps when monitors are disconnected or recalibrated. Lab values like lactate, WBC, and creatinine are drawn periodically — sometimes once a day, sometimes less — so entire stretches of a patient’s stay have no lab readings at all.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://leonardoalva98.github.io/senior_project/posts/Building-the-model/missing_values.png" class="img-fluid figure-img"></p>
+<figcaption>Missing value rate across all columns. Red bars were dropped (&gt;80% missing), blue bars were forward-filled.</figcaption>
+</figure>
+</div>
+<p>Here’s what the missingness looked like across key columns:</p>
+<ul>
+<li><code>HR</code> — 7.7% missing</li>
+<li><code>Temp</code> — 66% missing</li>
+<li><code>Lactate</code> — 97% missing</li>
+<li><code>EtCO2</code> — 100% missing (completely empty)</li>
+</ul>
+<p>Five columns — <code>EtCO2</code>, <code>TroponinI</code>, <code>Bilirubin_direct</code>, <code>Fibrinogen</code>, and <code>Bilirubin_total</code> — were more than 80% missing. These were dropped entirely. The rest were handled through forward filling.</p>
+</section>
+<section id="forward-fill-what-it-is-and-why-not-interpolation" class="level2">
+<h2 class="anchored" data-anchor-id="forward-fill-what-it-is-and-why-not-interpolation">Forward Fill: What It Is and Why Not Interpolation</h2>
+<p>For vital signs, I used <strong>forward fill</strong> — carrying the last known reading forward in time within each patient’s hourly record.</p>
+<p>If a patient’s heart rate was recorded as 97 at hour 2 and the next reading wasn’t until hour 5, hours 3 and 4 get filled with 97. The assumption is that the last known value is the best estimate of what was happening in the interim.</p>
+<p>A natural question is why not use <strong>linear interpolation</strong> — gradually transitioning between the hour 2 value and the hour 5 value. Interpolation is more mathematically elegant, but it has a fundamental problem in this context: it uses future information to fill past values. At hour 3, you wouldn’t actually know what the hour 5 reading would be. Using that future data to fill the gap would be <strong>data leakage</strong> — the model would be trained on information it couldn’t have in real deployment. Forward fill avoids this entirely.</p>
+<p>Lab values like lactate and creatinine were left with their remaining NaNs after forward filling. XGBoost handles missing values natively, so these don’t need to be filled.</p>
+</section>
+<section id="feature-engineering-teaching-the-model-to-see-trends" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering-teaching-the-model-to-see-trends">Feature Engineering: Teaching the Model to See Trends</h2>
+<p>The single most important insight driving the feature engineering was this: <strong>a snapshot is less informative than a trend</strong>.</p>
+<p>A heart rate of 102 bpm is mildly elevated. A heart rate that has risen from 82 to 102 over the last 6 hours is a warning sign. The raw value doesn’t tell that story — the rate of change does.</p>
+<p>For each of the five key vitals (HR, Temp, Resp, MAP, O2Sat), I created two new features using a 6-hour rolling window:</p>
+<p><strong>Rolling average</strong> — the mean of the last 6 hourly readings. This smooths out noise and captures the sustained level of a vital sign rather than a one-off spike.</p>
+<p><strong>Rate of change</strong> — the difference between the current reading and the reading 6 hours ago. A positive value means the vital is rising; negative means it’s falling. This is the early warning signal.</p>
+<p>I also encoded three established clinical scores directly as features:</p>
+<p><strong>SIRS Score</strong> — counts how many of the four SIRS criteria are met at each hour (HR &gt; 90, Temp &gt; 38 or &lt; 36, Resp &gt; 20, WBC &gt; 12 or &lt; 4). This is the same checklist nurses already use — turning it into a single number gives the model a compact summary of clinical risk.</p>
+<p><strong>Shock Index</strong> — heart rate divided by systolic blood pressure. Normal is around 0.5. Above 1.0 indicates significant cardiovascular stress. This ratio captures something neither HR nor SBP captures alone.</p>
+<p><strong>Pulse Pressure</strong> — systolic minus diastolic blood pressure. A narrowing pulse pressure indicates the heart is struggling to maintain output.</p>
+<p>The scatter plots below show each SIRS variable against the sepsis label. Notice how no single variable cleanly separates the two groups — this is exactly why machine learning is needed over simple threshold rules.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://leonardoalva98.github.io/senior_project/posts/Building-the-model/sirs_scatter.png" class="img-fluid figure-img"></p>
+<figcaption>SIRS criteria plotted against sepsis label. No single variable cleanly separates the groups — confirming that ML is needed to find the combined pattern.</figcaption>
+</figure>
+</div>
+</section>
+<section id="the-early-signal" class="level2">
+<h2 class="anchored" data-anchor-id="the-early-signal">The Early Signal</h2>
+<p>Before modeling, the EDA revealed something critical. When I aligned all sepsis patients to their onset time and looked at the 12 hours before the label flipped, their vitals were already diverging from non-sepsis patients — from the very beginning of the window.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://leonardoalva98.github.io/senior_project/posts/Building-the-model/12hr_before_sepsis.png" class="img-fluid figure-img"></p>
+<figcaption>Vital signs in the 12 hours before sepsis onset (orange) vs non-sepsis patients (blue). The red dashed line marks official sepsis onset. The divergence begins well before hour 0.</figcaption>
+</figure>
+</div>
+<p>This is known as <strong>label uncertainty</strong> — the label marks when sepsis was recognized, not when it started. The physiological deterioration precedes the diagnosis. Combined with the 6-hour label shift already built into the dataset, the detectable signal begins approximately <strong>18 hours before clinical recognition</strong>.</p>
+</section>
+<section id="the-class-imbalance-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-class-imbalance-problem">The Class Imbalance Problem</h2>
+<p>Of the 20,336 patients in the dataset, only 1,790 — about 8.8% — ever develop sepsis. At the row level, since most hours for even sepsis patients are labeled 0, the sepsis rate drops to just <strong>2.2%</strong>. For every sepsis row the model sees during training, it sees 45 non-sepsis rows.</p>
+<p>If left unaddressed, the model would learn to predict “no sepsis” for everything and achieve 97.8% accuracy while being completely useless clinically.</p>
+<p>XGBoost handles this through a parameter called <code>scale_pos_weight</code>, which instructs the model to treat each sepsis row as if it were 45 non-sepsis rows. This forces the model to pay equal attention to both classes despite the imbalance.</p>
+</section>
+<section id="why-xgboost" class="level2">
+<h2 class="anchored" data-anchor-id="why-xgboost">Why XGBoost</h2>
+<p>I trained two models: a logistic regression as a baseline, and XGBoost as the primary model.</p>
+<p>Logistic regression is a linear model — it can only find straight-line relationships between features and outcome. Sepsis risk doesn’t work that way. A heart rate of 90 combined with rising lactate and dropping blood pressure is far more dangerous than any of those values in isolation. Capturing that interaction requires a non-linear model.</p>
+<p>XGBoost is a gradient boosting algorithm that builds an ensemble of decision trees, with each tree correcting the errors of the previous ones. It has two specific advantages for this problem: it handles missing values natively (important given how sparse the lab data is), and it captures complex non-linear interactions between features automatically.</p>
+<p>One important methodological note on the train/test split: I split at the <strong>patient level</strong>, not the row level. This means every row for a given patient ended up entirely in the training set or entirely in the test set — never both. A row-level split would allow the model to see hour 1-40 of a patient during training and then predict hours 41-54 in the test set. Since the model has already seen that patient, this inflates performance metrics. Patient-level splitting gives a more honest estimate of how the model would perform on genuinely new patients.</p>
+</section>
+<section id="shap-opening-the-black-box" class="level2">
+<h2 class="anchored" data-anchor-id="shap-opening-the-black-box">SHAP: Opening the Black Box</h2>
+<p>A model that outputs a risk score but can’t explain it is not useful in a clinical setting. A nurse who sees “HIGH RISK” without knowing which vitals are driving that alert has no clear action to take.</p>
+<p>SHAP (SHapley Additive exPlanations) solves this by assigning each feature a contribution score for every individual prediction. A positive SHAP value means that feature pushed the risk score up; a negative value means it pushed it down.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://leonardoalva98.github.io/senior_project/posts/Building-the-model/shap_importance.png" class="img-fluid figure-img"></p>
+<figcaption>SHAP feature importance — the top predictors of sepsis risk ranked by their average impact on model output.</figcaption>
+</figure>
+</div>
+<p>The top features by importance were ICULOS (hours in ICU), HospAdmTime, ICU unit type, respiratory rate rolling average, age, temperature, and blood pressure. Several of the engineered features — particularly <code>Resp_rolling6</code> and <code>MAP_rolling6</code> — ranked in the top 10, validating the time-based feature engineering approach.</p>
+<p>One finding worth flagging: ICULOS (hours in the ICU) ranking as the most important feature suggests the model is partly learning that patients who stay longer are more likely to develop sepsis — a real but not entirely actionable signal. This is an area for future refinement.</p>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>In the final post, I’ll share the model’s performance results, walk through the clinical evaluation — including how we measured hours of early detection — and reflect on what building this project taught me about the gap between a working model and a deployable clinical tool.</p>
+<hr>
+<p><em>The full code for this project is available at <a href="https://github.com/leonardoalva98/senior_project">github.com/leonardoalva98/senior_project</a>. Dataset: PhysioNet CinC Challenge 2019.</em></p>
+
+
+</section>
+
+ ]]></description>
+  <category>healthcare</category>
+  <category>data science &amp; ML</category>
+  <guid>https://leonardoalva98.github.io/senior_project/posts/Building-the-model/</guid>
+  <pubDate>Sun, 29 Mar 2026 06:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Sepsis in the ICU — And How ML Could Help Stop It</title>
   <dc:creator>Leonardo Alvarino</dc:creator>

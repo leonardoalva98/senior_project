@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Leonardo Alvarino">
+<meta name="dcterms.date" content="2026-03-29">
+<meta name="description" content="A technical walkthrough of how I cleaned 790,000 rows of ICU data, engineered clinical features, and trained an XGBoost model to predict sepsis onset">
 
-<title>Early Sepsis Detection: A Data Science Approach – Leo Alvarino Senior Project</title>
+<title>Building a Sepsis Predictor – Leo Alvarino Senior Project</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,26 +29,24 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-076ecbd647e1f0418c5051713cd9b730.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-076ecbd647e1f0418c5051713cd9b730.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -73,77 +74,19 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
 
-    const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
-    };
+<link rel="stylesheet" href="../../styles.css">
+</head>
 
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="Leo Alvarino Senior Project" href="index.xml" data-external="1"></head>
-
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed fullcontent quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+  <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Leo Alvarino Senior Project</span>
     </a>
   </div>
@@ -154,7 +97,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -175,108 +118,151 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Early Sepsis Detection: A Data Science Approach</h1>
-                      </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta column-page-left">
-
-      
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(2)</span></div><div class="category" data-category="ZGF0YSUyMHNjaWVuY2UlMjAlMjYlMjBNTA==">data science &amp; ML <span class="quarto-category-count">(2)</span></div><div class="category" data-category="aGVhbHRoY2FyZQ==">healthcare <span class="quarto-category-count">(2)</span></div></div></div>
+    
 <!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Building a Sepsis Predictor</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">healthcare</div>
+    <div class="quarto-category">data science &amp; ML</div>
+  </div>
+  </div>
 
-
-
-
-
-
-
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="aGVhbHRoY2FyZSUyQ2RhdGElMjBzY2llbmNlJTIwJTI2JTIwTUw=" data-listing-date-sort="1774764000000" data-listing-file-modified-sort="1774892808279" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1507">
-<div class="thumbnail"><a href="./posts/Building-the-model/index.html" class="no-external">
-
-<p class="card-img-top"><img loading='lazy' src="posts/Building-the-model/missing_values.png"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/Building-the-model/index.html" class="no-external">Building a Sepsis Predictor</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('aGVhbHRoY2FyZQ=='); return false;">healthcare</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('ZGF0YSUyMHNjaWVuY2UlMjAlMjYlMjBNTA=='); return false;">data science &amp; ML</div>
-
+<div>
+  <div class="description">
+    A technical walkthrough of how I cleaned 790,000 rows of ICU data, engineered clinical features, and trained an XGBoost model to predict sepsis onset
+  </div>
 </div>
-<div class="delink listing-description"><a href="./posts/Building-the-model/index.html" class="no-external">
-<p>A technical walkthrough of how I cleaned 790,000 rows of ICU data, engineered clinical features, and trained an XGBoost model to predict sepsis onset</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/Building-the-model/index.html" class="no-external">
-<div class="listing-date">
-Mar 29, 2026
-</div>
-<div class="listing-author">
-Leonardo Alvarino
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="aGVhbHRoY2FyZSUyQ2RhdGElMjBzY2llbmNlJTIwJTI2JTIwTUw=" data-listing-date-sort="1773036000000" data-listing-file-modified-sort="1773123089801" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="908">
-<div class="thumbnail"><a href="./posts/Introduction/index.html" class="no-external">
 
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
 
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/Introduction/index.html" class="no-external">Sepsis in the ICU — And How ML Could Help Stop It</a>
-</h3>
-<div class="listing-categories">
+<div class="quarto-title-meta">
 
-<div class="listing-category" onclick="window.quartoListingCategory('aGVhbHRoY2FyZQ=='); return false;">healthcare</div>
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Leonardo Alvarino </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 29, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
 
-<div class="listing-category" onclick="window.quartoListingCategory('ZGF0YSUyMHNjaWVuY2UlMjAlMjYlMjBNTA=='); return false;">data science &amp; ML</div>
 
+</header>
+
+
+<p>In my <a href="../../posts/Introduction/index.html">first post</a>, I explained why sepsis is so hard to catch early and why machine learning could help. In this post I’ll walk through exactly how I built the model: the messy data, the engineering decisions, and the trade offs along the way.</p>
+<section id="the-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="the-dataset">The Dataset</h2>
+<p>The data comes from the PhysioNet Computing in Cardiology Challenge 2019 — a publicly available dataset of <strong>20,336 de-identified ICU patients</strong> from two US hospital systems. Each patient file contains one row per hour in the ICU, with columns for vital signs, lab values, and demographics.</p>
+<p>After combining all 20,336 files into one dataframe, I had <strong>790,215 rows and 42 columns</strong>. That’s every hourly ICU reading across all patients — a complete picture of what it looks like to monitor someone in critical care.</p>
+<p>One important detail about the labels: the PhysioNet challenge shifts <code>SepsisLabel</code> six hours ahead of clinical diagnosis. This means when the label flips to 1, it’s already 6 hours before a doctor would officially recognize sepsis. Every prediction the model makes is therefore automatically 6 hours ahead of clinical recognition, before I even start feature engineering.</p>
+</section>
+<section id="the-mess-missing-values" class="level2">
+<h2 class="anchored" data-anchor-id="the-mess-missing-values">The Mess: Missing Values</h2>
+<p>Vital signs like heart rate and blood pressure are recorded continuously by bedside monitors, but even those have gaps when monitors are disconnected or recalibrated. Lab values like lactate, WBC, and creatinine are drawn periodically — sometimes once a day, sometimes less — so entire stretches of a patient’s stay have no lab readings at all.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="missing_values.png" class="img-fluid figure-img"></p>
+<figcaption>Missing value rate across all columns. Red bars were dropped (&gt;80% missing), blue bars were forward-filled.</figcaption>
+</figure>
 </div>
-<div class="delink listing-description"><a href="./posts/Introduction/index.html" class="no-external">
-<p>Every year, sepsis kills more Americans than breast cancer, prostate cancer, and opioid overdoses combined. Here’s how machine learning could change that.</p>
-</a></div>
+<p>Here’s what the missingness looked like across key columns:</p>
+<ul>
+<li><code>HR</code> — 7.7% missing</li>
+<li><code>Temp</code> — 66% missing</li>
+<li><code>Lactate</code> — 97% missing</li>
+<li><code>EtCO2</code> — 100% missing (completely empty)</li>
+</ul>
+<p>Five columns — <code>EtCO2</code>, <code>TroponinI</code>, <code>Bilirubin_direct</code>, <code>Fibrinogen</code>, and <code>Bilirubin_total</code> — were more than 80% missing. These were dropped entirely. The rest were handled through forward filling.</p>
+</section>
+<section id="forward-fill-what-it-is-and-why-not-interpolation" class="level2">
+<h2 class="anchored" data-anchor-id="forward-fill-what-it-is-and-why-not-interpolation">Forward Fill: What It Is and Why Not Interpolation</h2>
+<p>For vital signs, I used <strong>forward fill</strong> — carrying the last known reading forward in time within each patient’s hourly record.</p>
+<p>If a patient’s heart rate was recorded as 97 at hour 2 and the next reading wasn’t until hour 5, hours 3 and 4 get filled with 97. The assumption is that the last known value is the best estimate of what was happening in the interim.</p>
+<p>A natural question is why not use <strong>linear interpolation</strong> — gradually transitioning between the hour 2 value and the hour 5 value. Interpolation is more mathematically elegant, but it has a fundamental problem in this context: it uses future information to fill past values. At hour 3, you wouldn’t actually know what the hour 5 reading would be. Using that future data to fill the gap would be <strong>data leakage</strong> — the model would be trained on information it couldn’t have in real deployment. Forward fill avoids this entirely.</p>
+<p>Lab values like lactate and creatinine were left with their remaining NaNs after forward filling. XGBoost handles missing values natively, so these don’t need to be filled.</p>
+</section>
+<section id="feature-engineering-teaching-the-model-to-see-trends" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering-teaching-the-model-to-see-trends">Feature Engineering: Teaching the Model to See Trends</h2>
+<p>The single most important insight driving the feature engineering was this: <strong>a snapshot is less informative than a trend</strong>.</p>
+<p>A heart rate of 102 bpm is mildly elevated. A heart rate that has risen from 82 to 102 over the last 6 hours is a warning sign. The raw value doesn’t tell that story — the rate of change does.</p>
+<p>For each of the five key vitals (HR, Temp, Resp, MAP, O2Sat), I created two new features using a 6-hour rolling window:</p>
+<p><strong>Rolling average</strong> — the mean of the last 6 hourly readings. This smooths out noise and captures the sustained level of a vital sign rather than a one-off spike.</p>
+<p><strong>Rate of change</strong> — the difference between the current reading and the reading 6 hours ago. A positive value means the vital is rising; negative means it’s falling. This is the early warning signal.</p>
+<p>I also encoded three established clinical scores directly as features:</p>
+<p><strong>SIRS Score</strong> — counts how many of the four SIRS criteria are met at each hour (HR &gt; 90, Temp &gt; 38 or &lt; 36, Resp &gt; 20, WBC &gt; 12 or &lt; 4). This is the same checklist nurses already use — turning it into a single number gives the model a compact summary of clinical risk.</p>
+<p><strong>Shock Index</strong> — heart rate divided by systolic blood pressure. Normal is around 0.5. Above 1.0 indicates significant cardiovascular stress. This ratio captures something neither HR nor SBP captures alone.</p>
+<p><strong>Pulse Pressure</strong> — systolic minus diastolic blood pressure. A narrowing pulse pressure indicates the heart is struggling to maintain output.</p>
+<p>The scatter plots below show each SIRS variable against the sepsis label. Notice how no single variable cleanly separates the two groups — this is exactly why machine learning is needed over simple threshold rules.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="sirs_scatter.png" class="img-fluid figure-img"></p>
+<figcaption>SIRS criteria plotted against sepsis label. No single variable cleanly separates the groups — confirming that ML is needed to find the combined pattern.</figcaption>
+</figure>
 </div>
-<div class="metadata">
-<a href="./posts/Introduction/index.html" class="no-external">
-<div class="listing-date">
-Mar 9, 2026
+</section>
+<section id="the-early-signal" class="level2">
+<h2 class="anchored" data-anchor-id="the-early-signal">The Early Signal</h2>
+<p>Before modeling, the EDA revealed something critical. When I aligned all sepsis patients to their onset time and looked at the 12 hours before the label flipped, their vitals were already diverging from non-sepsis patients — from the very beginning of the window.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="12hr_before_sepsis.png" class="img-fluid figure-img"></p>
+<figcaption>Vital signs in the 12 hours before sepsis onset (orange) vs non-sepsis patients (blue). The red dashed line marks official sepsis onset. The divergence begins well before hour 0.</figcaption>
+</figure>
 </div>
-<div class="listing-author">
-Leonardo Alvarino
+<p>This is known as <strong>label uncertainty</strong> — the label marks when sepsis was recognized, not when it started. The physiological deterioration precedes the diagnosis. Combined with the 6-hour label shift already built into the dataset, the detectable signal begins approximately <strong>18 hours before clinical recognition</strong>.</p>
+</section>
+<section id="the-class-imbalance-problem" class="level2">
+<h2 class="anchored" data-anchor-id="the-class-imbalance-problem">The Class Imbalance Problem</h2>
+<p>Of the 20,336 patients in the dataset, only 1,790 — about 8.8% — ever develop sepsis. At the row level, since most hours for even sepsis patients are labeled 0, the sepsis rate drops to just <strong>2.2%</strong>. For every sepsis row the model sees during training, it sees 45 non-sepsis rows.</p>
+<p>If left unaddressed, the model would learn to predict “no sepsis” for everything and achieve 97.8% accuracy while being completely useless clinically.</p>
+<p>XGBoost handles this through a parameter called <code>scale_pos_weight</code>, which instructs the model to treat each sepsis row as if it were 45 non-sepsis rows. This forces the model to pay equal attention to both classes despite the imbalance.</p>
+</section>
+<section id="why-xgboost" class="level2">
+<h2 class="anchored" data-anchor-id="why-xgboost">Why XGBoost</h2>
+<p>I trained two models: a logistic regression as a baseline, and XGBoost as the primary model.</p>
+<p>Logistic regression is a linear model — it can only find straight-line relationships between features and outcome. Sepsis risk doesn’t work that way. A heart rate of 90 combined with rising lactate and dropping blood pressure is far more dangerous than any of those values in isolation. Capturing that interaction requires a non-linear model.</p>
+<p>XGBoost is a gradient boosting algorithm that builds an ensemble of decision trees, with each tree correcting the errors of the previous ones. It has two specific advantages for this problem: it handles missing values natively (important given how sparse the lab data is), and it captures complex non-linear interactions between features automatically.</p>
+<p>One important methodological note on the train/test split: I split at the <strong>patient level</strong>, not the row level. This means every row for a given patient ended up entirely in the training set or entirely in the test set — never both. A row-level split would allow the model to see hour 1-40 of a patient during training and then predict hours 41-54 in the test set. Since the model has already seen that patient, this inflates performance metrics. Patient-level splitting gives a more honest estimate of how the model would perform on genuinely new patients.</p>
+</section>
+<section id="shap-opening-the-black-box" class="level2">
+<h2 class="anchored" data-anchor-id="shap-opening-the-black-box">SHAP: Opening the Black Box</h2>
+<p>A model that outputs a risk score but can’t explain it is not useful in a clinical setting. A nurse who sees “HIGH RISK” without knowing which vitals are driving that alert has no clear action to take.</p>
+<p>SHAP (SHapley Additive exPlanations) solves this by assigning each feature a contribution score for every individual prediction. A positive SHAP value means that feature pushed the risk score up; a negative value means it pushed it down.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="shap_importance.png" class="img-fluid figure-img"></p>
+<figcaption>SHAP feature importance — the top predictors of sepsis risk ranked by their average impact on model output.</figcaption>
+</figure>
 </div>
-</a>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+<p>The top features by importance were ICULOS (hours in ICU), HospAdmTime, ICU unit type, respiratory rate rolling average, age, temperature, and blood pressure. Several of the engineered features — particularly <code>Resp_rolling6</code> and <code>MAP_rolling6</code> — ranked in the top 10, validating the time-based feature engineering approach.</p>
+<p>One finding worth flagging: ICULOS (hours in the ICU) ranking as the most important feature suggests the model is partly learning that patients who stay longer are more likely to develop sepsis — a real but not entirely actionable signal. This is an area for future refinement.</p>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
+<p>In the final post, I’ll share the model’s performance results, walk through the clinical evaluation — including how we measured hours of early detection — and reflect on what building this project taught me about the gap between a working model and a deployable clinical tool.</p>
+<hr>
+<p><em>The full code for this project is available at <a href="https://github.com/leonardoalva98/senior_project">github.com/leonardoalva98/senior_project</a>. Dataset: PhysioNet CinC Challenge 2019.</em></p>
+
+
+</section>
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
