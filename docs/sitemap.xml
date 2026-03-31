@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://leonardoalva98.github.io/senior_project/about.html</loc>
-    <lastmod>2026-02-25T05:08:28.680Z</lastmod>
-  </url>
-  <url>
-    <loc>https://leonardoalva98.github.io/senior_project/posts/Building-the-model/index.html</loc>
-    <lastmod>2026-03-30T17:46:48.279Z</lastmod>
-  </url>
-  <url>
     <loc>https://leonardoalva98.github.io/senior_project/posts/Introduction/index.html</loc>
     <lastmod>2026-03-10T06:11:29.801Z</lastmod>
   </url>
   <url>
     <loc>https://leonardoalva98.github.io/senior_project/index.html</loc>
     <lastmod>2026-03-09T23:22:39.712Z</lastmod>
+  </url>
+  <url>
+    <loc>https://leonardoalva98.github.io/senior_project/about.html</loc>
+    <lastmod>2026-02-25T05:08:28.680Z</lastmod>
+  </url>
+  <url>
+    <loc>https://leonardoalva98.github.io/senior_project/posts/Building-the-model/index.html</loc>
+    <lastmod>2026-03-31T05:05:48.972Z</lastmod>
+  </url>
+  <url>
+    <loc>https://leonardoalva98.github.io/senior_project/posts/results/index.html</loc>
+    <lastmod>2026-03-31T05:09:42.042Z</lastmod>
   </url>
 </urlset>

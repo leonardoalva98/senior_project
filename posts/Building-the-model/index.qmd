@@ -1,8 +1,8 @@
 ---
 title: "Building a Sepsis Predictor"
 author: "Leonardo Alvarino"
-date: "2026-03-29"
-categories: [healthcare, data science & ML]
+date: "2026-03-20"
+categories: [healthcare, data science & ML, XGBoost]
 description: "A technical walkthrough of how I cleaned 790,000 rows of ICU data, engineered clinical features, and trained an XGBoost model to predict sepsis onset"
 ---
 
@@ -12,13 +12,13 @@ In my [first post](../Introduction/index.qmd), I explained why sepsis is so hard
 
 The data comes from the PhysioNet Computing in Cardiology Challenge 2019 — a publicly available dataset of **20,336 de-identified ICU patients** from two US hospital systems. Each patient file contains one row per hour in the ICU, with columns for vital signs, lab values, and demographics.
 
-After combining all 20,336 files into one dataframe, I had **790,215 rows and 42 columns**. That's every hourly ICU reading across all patients — a complete picture of what it looks like to monitor someone in critical care.
+After combining all 20,336 files into one dataframe, I had **790,215 rows and 42 columns**. That's every hourly ICU reading across all patients, a complete picture of what it looks like to monitor someone in critical care.
 
-One important detail about the labels: the PhysioNet challenge shifts `SepsisLabel` six hours ahead of clinical diagnosis. This means when the label flips to 1, it's already 6 hours before a doctor would officially recognize sepsis. Every prediction the model makes is therefore automatically 6 hours ahead of clinical recognition, before I even start feature engineering.
+One important detail about the labels: the PhysioNet challenge shifts `SepsisLabel` six hours ahead of clinical diagnosis. This means when the label flips to 1, it's already 6 hours before a doctor would officially recognize sepsis. This means that if my model predicted Sepsis with 3 hours of advance for patient X, it was actually 9 hours before the actual diagnosis. 
 
 ## The Mess: Missing Values
 
-Vital signs like heart rate and blood pressure are recorded continuously by bedside monitors, but even those have gaps when monitors are disconnected or recalibrated. Lab values like lactate, WBC, and creatinine are drawn periodically — sometimes once a day, sometimes less — so entire stretches of a patient's stay have no lab readings at all.
+Vital signs like heart rate and blood pressure are recorded continuously by bedside monitors, but even those have gaps when monitors are disconnected or recalibrated. Lab values like lactate, WBC, and creatinine are drawn periodically, sometimes once a day, sometimes less — so entire stretches of a patient's stay have no lab readings at all.
 
 ![Missing value rate across all columns. Red bars were dropped (>80% missing), blue bars were forward-filled.](missing_values.png)
 
@@ -105,8 +105,8 @@ One finding worth flagging: ICULOS (hours in the ICU) ranking as the most import
 
 ## What's Next
 
-In the final post, I'll share the model's performance results, walk through the clinical evaluation — including how we measured hours of early detection — and reflect on what building this project taught me about the gap between a working model and a deployable clinical tool.
+In the third and final blog post, I'll share the model's performance results, walk through the clinical evaluation — including how we measured hours of early detection — and reflect on what are the limitations and considerations of the results.
 
 ---
 
-*The full code for this project is available at [github.com/leonardoalva98/senior_project](https://github.com/leonardoalva98/senior_project). Dataset: PhysioNet CinC Challenge 2019.*
+*The full code for this project is available at [https://github.com/leonardoalva98/senior_project/tree/main/code] Dataset: PhysioNet CinC Challenge 2019.*

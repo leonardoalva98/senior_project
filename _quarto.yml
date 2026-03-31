@@ -1,7 +1,9 @@
 project:
   type: website
   output-dir: docs
-  
+  render:
+    - "*.qmd"
+    - "posts/**/*.qmd"
 website:
   description: "A blog built with Quarto"
   site-url: https://leonardoalva98.github.io/senior_project/ # you must change this appropriately for RSS feeds to work properly

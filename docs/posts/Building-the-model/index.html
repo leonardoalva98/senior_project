@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Leonardo Alvarino">
-<meta name="dcterms.date" content="2026-03-29">
+<meta name="dcterms.date" content="2026-03-20">
 <meta name="description" content="A technical walkthrough of how I cleaned 790,000 rows of ICU data, engineered clinical features, and trained an XGBoost model to predict sepsis onset">
 
 <title>Building a Sepsis Predictor – Leo Alvarino Senior Project</title>
@@ -131,6 +131,7 @@ ul.task-list li input[type="checkbox"] {
   <div class="quarto-categories">
     <div class="quarto-category">healthcare</div>
     <div class="quarto-category">data science &amp; ML</div>
+    <div class="quarto-category">XGBoost</div>
   </div>
   </div>
 
@@ -153,7 +154,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">March 29, 2026</p>
+      <p class="date">March 20, 2026</p>
     </div>
   </div>
   
@@ -169,12 +170,12 @@ ul.task-list li input[type="checkbox"] {
 <section id="the-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="the-dataset">The Dataset</h2>
 <p>The data comes from the PhysioNet Computing in Cardiology Challenge 2019 — a publicly available dataset of <strong>20,336 de-identified ICU patients</strong> from two US hospital systems. Each patient file contains one row per hour in the ICU, with columns for vital signs, lab values, and demographics.</p>
-<p>After combining all 20,336 files into one dataframe, I had <strong>790,215 rows and 42 columns</strong>. That’s every hourly ICU reading across all patients — a complete picture of what it looks like to monitor someone in critical care.</p>
-<p>One important detail about the labels: the PhysioNet challenge shifts <code>SepsisLabel</code> six hours ahead of clinical diagnosis. This means when the label flips to 1, it’s already 6 hours before a doctor would officially recognize sepsis. Every prediction the model makes is therefore automatically 6 hours ahead of clinical recognition, before I even start feature engineering.</p>
+<p>After combining all 20,336 files into one dataframe, I had <strong>790,215 rows and 42 columns</strong>. That’s every hourly ICU reading across all patients, a complete picture of what it looks like to monitor someone in critical care.</p>
+<p>One important detail about the labels: the PhysioNet challenge shifts <code>SepsisLabel</code> six hours ahead of clinical diagnosis. This means when the label flips to 1, it’s already 6 hours before a doctor would officially recognize sepsis. This means that if my model predicted Sepsis with 3 hours of advance for patient X, it was actually 9 hours before the actual diagnosis.</p>
 </section>
 <section id="the-mess-missing-values" class="level2">
 <h2 class="anchored" data-anchor-id="the-mess-missing-values">The Mess: Missing Values</h2>
-<p>Vital signs like heart rate and blood pressure are recorded continuously by bedside monitors, but even those have gaps when monitors are disconnected or recalibrated. Lab values like lactate, WBC, and creatinine are drawn periodically — sometimes once a day, sometimes less — so entire stretches of a patient’s stay have no lab readings at all.</p>
+<p>Vital signs like heart rate and blood pressure are recorded continuously by bedside monitors, but even those have gaps when monitors are disconnected or recalibrated. Lab values like lactate, WBC, and creatinine are drawn periodically, sometimes once a day, sometimes less — so entire stretches of a patient’s stay have no lab readings at all.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="missing_values.png" class="img-fluid figure-img"></p>
@@ -255,9 +256,9 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s Next</h2>
-<p>In the final post, I’ll share the model’s performance results, walk through the clinical evaluation — including how we measured hours of early detection — and reflect on what building this project taught me about the gap between a working model and a deployable clinical tool.</p>
+<p>In the third and final blog post, I’ll share the model’s performance results, walk through the clinical evaluation — including how we measured hours of early detection — and reflect on what are the limitations and considerations of the results.</p>
 <hr>
-<p><em>The full code for this project is available at <a href="https://github.com/leonardoalva98/senior_project">github.com/leonardoalva98/senior_project</a>. Dataset: PhysioNet CinC Challenge 2019.</em></p>
+<p><em>The full code for this project is available at [https://github.com/leonardoalva98/senior_project/tree/main/code] Dataset: PhysioNet CinC Challenge 2019.</em></p>
 
 
 </section>
